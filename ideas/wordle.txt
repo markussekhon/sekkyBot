@@ -1,0 +1,17 @@
+1) is word valid - is it in list
+	- if not in list, dont take attempt, just prompt user
+	- otherwise contineu
+
+2) check if guess is target,
+	- won, if correct
+	- continue otherwise
+
+3) check each character in guess, if character matches with index in target return green
+
+4) remove hit character from target, generate key:value pair
+	- possibly replace greens with a symbol
+
+5) check each character in guess that isnt green with key:value pairs
+	- dec value if hit, and return yellow
+
+return the list of green/yellow/black emojis

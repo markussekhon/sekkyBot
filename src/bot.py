@@ -13,14 +13,18 @@ DISCORD_API_KEY = os.getenv('DISCORD_API_KEY')
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-
 # Initialize the client with intents
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 
 async def probeGemini(prompt):
-    response = await model.generate_content_async(prompt)
+    response = await model.generate_content_async(
+        prompt,
+        generation_config=genai.GenerationConfig(
+            max_output_tokens=200,
+            temperature=2.0
+        ))
     return response.text
 
 @client.event

@@ -2,7 +2,7 @@ import os
 import discord
 import psycopg2
 import google.generativeai as genai
-
+import wordle.utils as wordlegame
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -24,14 +24,14 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 # Initialize connection to PSQL DB
-dbconn = psycopg2.connect(
+conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,
     password=DB_PASSWORD,
     host=DB_HOST
 )
 
-dbcur = dbconn.cursor()
+cursor = conn.cursor()
 
 async def probeGemini(prompt):
     response = await model.generate_content_async(
@@ -59,5 +59,5 @@ async def on_message(message):
 # Run the client
 client.run(DISCORD_API_KEY)
 
-dbcur.close()
-dbconn.close()
+cursor.close()
+conn.close()

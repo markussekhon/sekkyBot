@@ -82,12 +82,12 @@ def findAttempts(cursor, serverID, discordID):
             FROM
                 wordlegames
             WHERE
-                discordID = %s
+                serverID = %s
                 AND
-                serverID = %s;
+                discordID = %s;
             """
     try:
-        cursor.execute(query, (discordID, serverID))
+        cursor.execute(query, (serverID, discordID))
         result = cursor.fetchone()
 
         if result:
@@ -146,11 +146,11 @@ async def asyncWordleGame(cursor, serverID, discordID, guess):
 
     if attempts < 6:
         if not checkValidity(cursor, guess):
-            #BOT SENDS MESSAGING NOT VALID GUESS
+            #bot should notify user guess was invalid based on 0
             return 0
 
         if guess == target:
-            #BOT CONGRATULATES PLAYER
+            #based on gamestate, bot should notify user it won
             updateAttempts(cursor, serverID, discordID, 6)
             return [2,2,2,2,2]
 
@@ -170,7 +170,9 @@ async def asyncWordleGame(cursor, serverID, discordID, guess):
         attempts += 1
         updateAttempts(cursor, serverID, discordID, attempts)
         return gamestate
+
     else:
+        #bot should notify user that it cant play until reset
         return 1
 
 

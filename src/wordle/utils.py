@@ -60,6 +60,13 @@ def validWord(cursor, guess):
             WHERE
                 word = %s;
             """
+    if len(guess) != 5:
+        return False
+
+    #Safe guard to prevent SQL injection
+    if not guess.isalnum():
+        return False
+
     try:
         cursor.execute(query, (guess,))
         result = cursor.fetchone()
@@ -131,21 +138,13 @@ def pickTarget(cursor, seed=str(datetime.today().date())):
     return word
 
 
-def checkValidity(cursor, guess):
-    if len(guess) != 5:
-        return False
-    if not validWord(cursor, guess):
-        return False
-    return True
-
-
-async def asyncWordleGame(cursor, serverID, discordID, guess):
+async def wordleRound(cursor, serverID, discordID, guess):
     seed = str(serverID) + str(datetime.today().date())
     target = pickTarget(cursor, seed=seed)
     attempts = findAttempts(cursor, serverID, discordID)
 
     if attempts < 6:
-        if not checkValidity(cursor, guess):
+        if not validWord(cursor, guess):
             #bot should notify user guess was invalid based on 0
             return 0
 
@@ -198,7 +197,7 @@ async def test():
 
         for _ in range(7):
             guess = input("Guess: ")
-            result = await asyncWordleGame(
+            result = await wordleRound(
                 cursor, serverID, discordID, guess)
             print(result)
 

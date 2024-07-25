@@ -167,3 +167,6 @@ db-cheatsheet.txt
 
 #dbms
 src/wordle/dbms
+
+#dockercompose
+.yml

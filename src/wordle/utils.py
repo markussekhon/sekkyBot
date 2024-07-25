@@ -146,12 +146,12 @@ async def wordleRound(cursor, serverID, discordID, guess):
     if attempts < 6:
         if not validWord(cursor, guess):
             #bot should notify user guess was invalid based on 0
-            return 0
+            return 2
 
         if guess == target:
             #based on gamestate, bot should notify user it won
             updateAttempts(cursor, serverID, discordID, 6)
-            return [2,2,2,2,2]
+            return 1
 
         gamestate = [0,0,0,0,0]
         library = Counter(target)
@@ -168,11 +168,11 @@ async def wordleRound(cursor, serverID, discordID, guess):
 
         attempts += 1
         updateAttempts(cursor, serverID, discordID, attempts)
-        return gamestate
+        return [gamestate,attempts]
 
     else:
         #bot should notify user that it cant play until reset
-        return 1
+        return 0
 
 
 async def test():

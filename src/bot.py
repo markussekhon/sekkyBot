@@ -58,6 +58,29 @@ async def on_ready():
     print(f'We have logged in as {bot.user.username}')
     scheduler.start()
 
+
+@interactions.slash_command(
+    name="wordlerecord",
+    description="Get your wordle W/L record!"
+)
+async def request_stats(ctx, guess):
+    if ctx.channel.name.lower() != "wordlestats":
+        await ctx.send(content="Get your wordlestats in the wordlestats channel. If there isnt a channel, ask an admin to make one! :)" ,ephemeral=True)
+        return
+
+    serverID = str(ctx.guild_id)
+    discordID = str(ctx.author.id)
+
+    w = wordlegame.findRecord(cursor, serverID, discordID, "win")
+    l = wordlegame.findRecord(cursor, serverID, discordID, "loss")
+
+    wins = w[0]
+    losses = l[0]
+    avgAttempts = (w[1]/(wins+losses))
+
+    await ctx.send(content=f"You have won {wins} games and lost {losses}. You averaged {avgAttempts} attempts per game.")
+
+
 @interactions.slash_command(
     name="playwordle",
     description="Play a round of Wordle",

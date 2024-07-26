@@ -129,6 +129,58 @@ def updateAttempts(cursor, serverID, discordID, attempts):
         print(f"An error occurred: {e}")
         cursor.connection.rollback()
 
+def addRecord(cursor, serverID, discordID, attempts, condition):
+    if condition not in ['win', 'loss']:
+        raise ValueError("Result must be in 'win' or 'loss'")
+
+    condition = 'wins' if condition == 'win' else 'losses'
+    insertion = f"""
+                INSERT INTO
+                    wordlerecords (serverID, discordID, attempts, {condition})
+                VALUES
+                    (%s , %s, %s, 1)
+                ON CONFLICT
+                    (serverID, discordID)
+                DO UPDATE
+                    SET {condition} = wordlerecords.{condition} + 1,
+                        attempts = wordlerecords.attempts + EXCLUDED.attempts
+                """
+
+    try:
+        cursor.execute(insertion, (serverID, discordID, attempts))
+        cursor.connection.commit()
+
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        cursor.connection.rollback()
+
+def findRecord(cursor, serverID, discordID, condition):
+    if condition not in ['win', 'loss']:
+        raise ValueError("Result must be in 'win' or 'loss'")
+
+    condition = 'wins' if condition == 'win' else 'losses'
+
+    query = f"""
+            SELECT
+                {condition}, attempts
+            FROM
+                wordlerecords
+            WHERE
+                serverID = %s AND discordID = %s;
+            """
+    try:
+        cursor.execute(query, (serverID, discordID))
+        result = cursor.fetchone()
+
+        if result:
+            return result
+        else:
+            return [0,0]
+
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        print("Failed to execute query")
+
 
 def pickTarget(cursor, seed=str(datetime.today().date())):
     count = findCount(cursor)
@@ -150,6 +202,7 @@ async def wordleRound(cursor, serverID, discordID, guess):
 
         if guess == target:
             #based on gamestate, bot should notify user it won
+            addRecord(cursor, serverID, discordID, attempts, "win")
             updateAttempts(cursor, serverID, discordID, 6)
             return 1
 
@@ -167,6 +220,8 @@ async def wordleRound(cursor, serverID, discordID, guess):
                 library[g_char] -= 1
 
         attempts += 1
+        if attempts == 6:
+            addRecord(cursor, serverID, discordID, attempts, "loss")
         updateAttempts(cursor, serverID, discordID, attempts)
         return [gamestate,attempts]
 

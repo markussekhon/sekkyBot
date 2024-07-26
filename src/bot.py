@@ -76,7 +76,7 @@ async def request_stats(ctx, guess):
 
     wins = w[0]
     losses = l[0]
-    avgAttempts = (w[1]/(wins+losses))
+    avgAttempts = (w[1]/(wins+losses)) if (wins+losses) > 0 else 0
 
     await ctx.send(content=f"You have won {wins} games and lost {losses}. You averaged {avgAttempts} attempts per game.")
 
